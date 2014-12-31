@@ -90,6 +90,17 @@ func (m *ConcurrentMap) Remove(key string) {
 	delete(shard.items, key)
 }
 
+func (m *ConcurrentMap) GetAndRemove(key string) (interface{}, bool) {
+	shard := m.GetShard(key)
+	shard.Lock()
+	defer shard.Unlock()
+	val, ok := shard.items[key]
+	if ok {
+		delete(shard.items, key)
+	}
+	return val, ok
+}
+
 // Checks if map is empty.
 func (m *ConcurrentMap) IsEmpty() bool {
 	return m.Count() == 0
